@@ -1,16 +1,17 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define DATA_SIZE 102400
+#define BUFFER_SIZE 128
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-void LoadDataset(int dataSetSize, char *filename, float* ds) 
+void LoadDataset(char *filename, float* ds) 
 {
 	FILE *fp;
 	fp = fopen(filename, "r");
 
-	for (int i = 0; i < dataSetSize; i++) 
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fscanf(fp, "%f", &ds[i]);
 	}
@@ -18,7 +19,7 @@ void LoadDataset(int dataSetSize, char *filename, float* ds)
 	fclose(fp);	
 }
 
-void WriteDataset(int dataSetSize, char *filename, float* sds, float avg, float min, float max)
+void WriteDataset(char *filename, float* sds, float avg, float min, float max)
 {
 	FILE *fp;
 
@@ -29,7 +30,7 @@ void WriteDataset(int dataSetSize, char *filename, float* sds, float avg, float 
 	fprintf(fp, "%f\n", min);
 	fprintf(fp, "%f\n", max);
 	
-	for (int i = 0; i < dataSetSize; i++) 
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fprintf(fp, "%f\n", sds[i]);
 	}
@@ -48,22 +49,22 @@ void CreateDataset(char *filename)
 	FILE *f;
 
 	//Init array with a fixed size
-	float v[102400 + 1];
-	int totalSize = sizeof(v) / sizeof(float);
+	float* v = malloc(BUFFER_SIZE * DATA_SIZE);
 
 	//Create a floating point random number between 0 and 100
-	for (int i = 0; i < totalSize - 1; i++) 
+	for (int i = 0; i < DATA_SIZE; i++) 
 	{
 		v[i] = GenerateRandom(100);
 	}
 	
 	f = fopen(filename, "w");
 
-	for (int i = 0; i < totalSize - 1; i++)
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fprintf(f, "%f\n", v[i]);
 	}
 
+	free(v);
 	fclose(f);
 }
 
@@ -75,16 +76,16 @@ void Swap(float *xp, float *yp)
 	*yp = temp;
 }
 
-void SelectionSort(float* ds, int dataSize)
+void SelectionSort(float* ds)
 {
 	int i, j, min_idx;
 
 	//One by one move boundary of unsorted subarray
-	for (i = 0; i < dataSize - 1; i++)
+	for (i = 0; i < DATA_SIZE - 1; i++)
 	{
 		//Find the minimum element in unsorted array
 		min_idx = i;
-		for (j = i + 1; j < dataSize; j++)
+		for (j = i + 1; j < DATA_SIZE; j++)
 		{
 			if (ds[j] < ds[min_idx])
 				min_idx = j;
@@ -95,25 +96,25 @@ void SelectionSort(float* ds, int dataSize)
 	}
 }
 
-float Average(float* ds, int dataSize)
+float Average(float* ds)
 {
 	float sum = 0.f;
 
 	//Create the sum of dataset values
-	for (int i = 0; i < dataSize; i++)
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		sum += ds[i];
 	}
 
-	return sum / dataSize;
+	return sum / DATA_SIZE;
 }
 
-float Maximum(float* ds, int dataSize)
+float Maximum(float* ds)
 {
 	float maxValue = 0.f;
 	
 	//Find maximum value in the dataset array
-	for (int i = 0; i < dataSize; i++)
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		if (ds[i] > maxValue)
 			maxValue = ds[i];
@@ -122,12 +123,12 @@ float Maximum(float* ds, int dataSize)
 	return maxValue;
 }
 
-float Minimum(float* ds, int dataSize)
+float Minimum(float* ds)
 {
 	float minValue = 100.f;
 
 	//Find maximum value in the dataset array
-	for (int i = 0; i < dataSize; i++)
+	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		if (ds[i] < minValue)
 			minValue = ds[i];
@@ -142,26 +143,28 @@ int main()
 	srand((unsigned int)time(NULL));
 
 	//Create the dataset
-	//CreateDataset("dataset.txt");
+	CreateDataset("dataset.txt");
 
 	//Load the dataset in the memory area addressed by ds
-	float ds[102400 + 1];
-	LoadDataset(DATA_SIZE, "dataset.txt", ds);
+	float* ds = malloc(BUFFER_SIZE * DATA_SIZE);
+	LoadDataset("dataset.txt", ds);
 
 	//Compute the average value of the dataset
-	float avg = Average(ds, DATA_SIZE);
+	float avg = Average(ds);
 
 	//Find the max value in the dataset
-	float max = Maximum(ds, DATA_SIZE);
+	float max = Maximum(ds);
 
 	//Find the min value in the dataset
-	float min = Minimum(ds, DATA_SIZE);
+	float min = Minimum(ds);
 
-	//Sort the dataset and copy it into the memory area pointed by sds
-	SelectionSort(ds, DATA_SIZE);
+	//Sort the dataset and put the new data in ds
+	SelectionSort(ds);
 
 	//Write sorted array to a new file
-	WriteDataset(DATA_SIZE, "sorted.txt", ds, avg, min, max);
+	WriteDataset("sorted.txt", ds, avg, min, max);
+
+	free(ds);
 
 	return 0;
 }
