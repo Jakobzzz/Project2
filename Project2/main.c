@@ -38,29 +38,34 @@ void WriteDataset(int dataSetSize, char *filename, float* sds, float avg, float 
 	fclose(fp);
 }
 
+float GenerateRandom(int rmax)
+{
+	//Generate a floating point random number between 0 and rmax
+	srand((unsigned int)time(NULL));
+	return ((float)rand() / (float)(RAND_MAX)) * rmax;
+}
+
 void CreateDataset(char *filename)
 {
 	FILE *f;
 
 	//Init array with a fixed size
-	int v[2];
-	int totalSize = sizeof(v) / sizeof(int);
+	float v[11];
+	int totalSize = sizeof(v) / sizeof(float);
 
 	//Create a floating point random number between 0 and 100
-	for (int i = 0; i <= totalSize; i++) 
+	for (int i = 0; i < totalSize - 1; i++) 
 	{
-		v[i] = (int)GenerateRand(100); 
+		v[i] = GenerateRandom(100);
 	}
 	
-	f = open(filename, "w");
+	f = fopen(filename, "w");
 
-	for (int n = 0; n < totalSize; n++) 
+	for (int i = 0; i < totalSize - 1; i++)
 	{
-		fprintf(f, "%d\n", v[n]);
+		fprintf(f, "%f\n", v[i]);
 	}
 
-
-	//fwrite(v, sizeof(float), totalSize, f);
 	fclose(f);
 }
 
@@ -95,17 +100,10 @@ float* SelectionSort(float* arr)
 	return arr;
 }
 
-float GenerateRand(int rmax) 
-{
-	//Generate a floating point random number between 0 and rmax
-	srand((unsigned int)time(NULL));
-	return ((float)rand() / (float)(RAND_MAX)) * rmax;
-}
-
 float Average(float* ds)
 {
 	int totalSize = sizeof(ds) / sizeof(float);
-	int sum = 0;
+	float sum = 0.f;
 
 	//Create the sum of dataset values
 	for (int i = 0; i <= totalSize; i++)
