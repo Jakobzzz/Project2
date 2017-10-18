@@ -41,7 +41,6 @@ void WriteDataset(int dataSetSize, char *filename, float* sds, float avg, float 
 float GenerateRandom(int rmax)
 {
 	//Generate a floating point random number between 0 and rmax
-	srand((unsigned int)time(NULL));
 	return ((float)rand() / (float)(RAND_MAX)) * rmax;
 }
 
@@ -50,7 +49,7 @@ void CreateDataset(char *filename)
 	FILE *f;
 
 	//Init array with a fixed size
-	float v[11];
+	float v[100 + 1];
 	int totalSize = sizeof(v) / sizeof(float);
 
 	//Create a floating point random number between 0 and 100
@@ -146,10 +145,12 @@ float Minimum(float* ds)
 
 int main()
 {
+	srand((unsigned int)time(NULL));
+
 	//Create the dataset
 	CreateDataset("dataset.txt");
 
-	////Load the dataset in the memory area addressed by ds
+	//Load the dataset in the memory area addressed by ds
 	//float* ds = LoadDataset(102400, "dataset.txt");
 
 	////Compute the average value of the dataset
