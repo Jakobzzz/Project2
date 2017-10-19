@@ -11,9 +11,13 @@ void LoadDataset(char *filename, float* ds)
 	FILE *fp;
 	fp = fopen(filename, "r");
 
+	/*char buffer[BUFFER_SIZE];
+	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));*/
+
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
-		fscanf(fp, "%f", &ds[i]);
+		fread(&ds[i], sizeof(float), 1, fp);
+		//fscanf(fp, "%f", &ds[i]);
 	}
 
 	fclose(fp);	
@@ -26,13 +30,17 @@ void WriteDataset(char *filename, float* sds, float avg, float min, float max)
 	fp = fopen(filename, "w");
 
 	//Write the average, min and max values to the first three lines of the file
-	fprintf(fp, "%f\n", avg);
-	fprintf(fp, "%f\n", min);
-	fprintf(fp, "%f\n", max);
+	fwrite(&avg, sizeof(float), 1, fp);
+	fwrite(&min, sizeof(float), 1, fp);
+	fwrite(&max, sizeof(float), 1, fp);
+	//fprintf(fp, "%f\n", avg);
+	//fprintf(fp, "%f\n", min);
+	//fprintf(fp, "%f\n", max);
 	
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
-		fprintf(fp, "%f\n", sds[i]);
+		fwrite(&sds[i], sizeof(float), 1, fp);
+		//fprintf(fp, "%f\n", sds[i]);
 	}
 
 	fclose(fp);
@@ -57,11 +65,12 @@ void CreateDataset(char *filename)
 		v[i] = GenerateRandom(100);
 	}
 	
-	f = fopen(filename, "w");
+	f = fopen(filename, "wb");
 
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
-		fprintf(f, "%f\n", v[i]);
+		fwrite(&v[i], sizeof(float), 1, f);
+		//fprintf(f, "%f\n", v[i]);
 	}
 
 	free(v);
@@ -146,25 +155,25 @@ int main()
 	CreateDataset("dataset.txt");
 
 	//Load the dataset in the memory area addressed by ds
-	float* ds = malloc(BUFFER_SIZE * DATA_SIZE);
-	LoadDataset("dataset.txt", ds);
+	//float* ds = malloc(BUFFER_SIZE * DATA_SIZE);
+	//LoadDataset("dataset.txt", ds);
 
-	//Compute the average value of the dataset
-	float avg = Average(ds);
+	////Compute the average value of the dataset
+	//float avg = Average(ds);
 
-	//Find the max value in the dataset
-	float max = Maximum(ds);
+	////Find the max value in the dataset
+	//float max = Maximum(ds);
 
-	//Find the min value in the dataset
-	float min = Minimum(ds);
+	////Find the min value in the dataset
+	//float min = Minimum(ds);
 
-	//Sort the dataset and put the new data in ds
-	SelectionSort(ds);
+	////Sort the dataset and put the new data in ds
+	//SelectionSort(ds);
 
-	//Write sorted array to a new file
-	WriteDataset("sorted.txt", ds, avg, min, max);
+	////Write sorted array to a new file
+	//WriteDataset("sorted.txt", ds, avg, min, max);
 
-	free(ds);
+	//free(ds);
 
 	return 0;
 }
