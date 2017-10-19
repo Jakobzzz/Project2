@@ -9,7 +9,7 @@
 void LoadDataset(char *filename, float* ds) 
 {
 	FILE *fp;
-	fp = fopen(filename, "r");
+	fp = fopen(filename, "r+b");
 
 	/*char buffer[BUFFER_SIZE];
 	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));*/
@@ -17,7 +17,6 @@ void LoadDataset(char *filename, float* ds)
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fread(&ds[i], sizeof(float), 1, fp);
-		//fscanf(fp, "%f", &ds[i]);
 	}
 
 	fclose(fp);	
@@ -27,20 +26,16 @@ void WriteDataset(char *filename, float* sds, float avg, float min, float max)
 {
 	FILE *fp;
 
-	fp = fopen(filename, "w");
+	fp = fopen(filename, "w+b");
 
 	//Write the average, min and max values to the first three lines of the file
 	fwrite(&avg, sizeof(float), 1, fp);
 	fwrite(&min, sizeof(float), 1, fp);
 	fwrite(&max, sizeof(float), 1, fp);
-	//fprintf(fp, "%f\n", avg);
-	//fprintf(fp, "%f\n", min);
-	//fprintf(fp, "%f\n", max);
 	
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fwrite(&sds[i], sizeof(float), 1, fp);
-		//fprintf(fp, "%f\n", sds[i]);
 	}
 
 	fclose(fp);
@@ -57,7 +52,7 @@ void CreateDataset(char *filename)
 	FILE *f;
 
 	//Init array with a fixed size
-	float* v = malloc(BUFFER_SIZE * DATA_SIZE);
+	float* v = malloc(sizeof(float) * DATA_SIZE);
 
 	//Create a floating point random number between 0 and 100
 	for (int i = 0; i < DATA_SIZE; i++) 
@@ -65,45 +60,65 @@ void CreateDataset(char *filename)
 		v[i] = GenerateRandom(100);
 	}
 	
-	f = fopen(filename, "wb");
+	f = fopen(filename, "w+b");
 
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fwrite(&v[i], sizeof(float), 1, f);
-		//fprintf(f, "%f\n", v[i]);
 	}
 
 	free(v);
 	fclose(f);
 }
 
-
-void Swap(float *xp, float *yp)
+void InsertionSort(float* ds)
 {
-	float temp = *xp;
-	*xp = *yp;
-	*yp = temp;
-}
+	int j;
+	float key = 0.f;
 
-void SelectionSort(float* ds)
-{
-	int i, j, min_idx;
-
-	//One by one move boundary of unsorted subarray
-	for (i = 0; i < DATA_SIZE - 1; i++)
+	for (int i = 1; i < DATA_SIZE; i++)
 	{
-		//Find the minimum element in unsorted array
-		min_idx = i;
-		for (j = i + 1; j < DATA_SIZE; j++)
-		{
-			if (ds[j] < ds[min_idx])
-				min_idx = j;
-		}
+		key = ds[i];
+		j = i - 1;
 
-		//Swap the found minimum element with the first element
-		Swap(&ds[min_idx], &ds[i]);
+		/* Move elements of arr[0..i-1], that are
+		greater than key, to one position ahead
+		of their current position */
+		while (j >= 0 && ds[j] > key)
+		{
+			ds[j + 1] = ds[j];
+			j = j - 1;
+		}
+		ds[j + 1] = key;
 	}
 }
+
+//void Swap(float *xp, float *yp)
+//{
+//	float temp = *xp;
+//	*xp = *yp;
+//	*yp = temp;
+//}
+//
+//void SelectionSort(float* ds)
+//{
+//	int i, j, min_idx;
+//
+//	//One by one move boundary of unsorted subarray
+//	for (i = 0; i < DATA_SIZE - 1; i++)
+//	{
+//		//Find the minimum element in unsorted array
+//		min_idx = i;
+//		for (j = i + 1; j < DATA_SIZE; j++)
+//		{
+//			if (ds[j] < ds[min_idx])
+//				min_idx = j;
+//		}
+//
+//		//Swap the found minimum element with the first element
+//		Swap(&ds[min_idx], &ds[i]);
+//	}
+//}
 
 float Average(float* ds)
 {
@@ -152,28 +167,28 @@ int main()
 	srand((unsigned int)time(NULL));
 
 	//Create the dataset
-	CreateDataset("dataset.txt");
+	//CreateDataset("dataset.dat");
 
 	//Load the dataset in the memory area addressed by ds
-	//float* ds = malloc(BUFFER_SIZE * DATA_SIZE);
-	//LoadDataset("dataset.txt", ds);
+	float* ds = malloc(sizeof(float) * DATA_SIZE);
+	LoadDataset("dataset.dat", ds);
 
-	////Compute the average value of the dataset
-	//float avg = Average(ds);
+	//Compute the average value of the dataset
+	float avg = Average(ds);
 
-	////Find the max value in the dataset
-	//float max = Maximum(ds);
+	//Find the max value in the dataset
+	float max = Maximum(ds);
 
-	////Find the min value in the dataset
-	//float min = Minimum(ds);
+	//Find the min value in the dataset
+	float min = Minimum(ds);
 
-	////Sort the dataset and put the new data in ds
-	//SelectionSort(ds);
+	//Sort the dataset and put the new data in ds
+	InsertionSort(ds);
 
-	////Write sorted array to a new file
-	//WriteDataset("sorted.txt", ds, avg, min, max);
+	//Write sorted array to a new file
+	WriteDataset("sorted.dat", ds, avg, min, max);
 
-	//free(ds);
+	free(ds);
 
 	return 0;
 }
