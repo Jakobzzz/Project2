@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define DATA_SIZE 102400
-#define BUFFER_SIZE 128
+#define DATA_SIZE 10240000
+#define BUFFER_SIZE 50000
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +12,7 @@ void LoadDataset(char *filename, float* ds)
 	fp = fopen(filename, "r+b");
 
 	char buffer[BUFFER_SIZE];
+	memset(buffer, '\0', sizeof(buffer));
 	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));
 
 	for (int i = 0; i < DATA_SIZE; i++)
@@ -34,6 +35,7 @@ void WriteDataset(char *filename, float* sds, float avg, float min, float max)
 	fwrite(&max, sizeof(float), 1, fp);
 
 	char buffer[BUFFER_SIZE];
+	memset(buffer, '\0', sizeof(buffer));
 	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));
 	
 	for (int i = 0; i < DATA_SIZE; i++)
@@ -66,6 +68,7 @@ void CreateDataset(char *filename)
 	f = fopen(filename, "w+b");
 
 	char buffer[BUFFER_SIZE];
+	memset(buffer, '\0', sizeof(buffer));
 	setvbuf(f, buffer, _IOFBF, sizeof(buffer));
 
 	for (int i = 0; i < DATA_SIZE; i++)
