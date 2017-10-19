@@ -11,8 +11,8 @@ void LoadDataset(char *filename, float* ds)
 	FILE *fp;
 	fp = fopen(filename, "r+b");
 
-	/*char buffer[BUFFER_SIZE];
-	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));*/
+	char buffer[BUFFER_SIZE];
+	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));
 
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
@@ -32,6 +32,9 @@ void WriteDataset(char *filename, float* sds, float avg, float min, float max)
 	fwrite(&avg, sizeof(float), 1, fp);
 	fwrite(&min, sizeof(float), 1, fp);
 	fwrite(&max, sizeof(float), 1, fp);
+
+	char buffer[BUFFER_SIZE];
+	setvbuf(fp, buffer, _IOFBF, sizeof(buffer));
 	
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
@@ -62,6 +65,9 @@ void CreateDataset(char *filename)
 	
 	f = fopen(filename, "w+b");
 
+	char buffer[BUFFER_SIZE];
+	setvbuf(f, buffer, _IOFBF, sizeof(buffer));
+
 	for (int i = 0; i < DATA_SIZE; i++)
 	{
 		fwrite(&v[i], sizeof(float), 1, f);
@@ -69,6 +75,11 @@ void CreateDataset(char *filename)
 
 	free(v);
 	fclose(f);
+}
+
+int Cmpfunc(const void * a, const void * b) 
+{
+	return (*(int*)a - *(int*)b);
 }
 
 void InsertionSort(float* ds)
@@ -93,33 +104,6 @@ void InsertionSort(float* ds)
 	}
 }
 
-//void Swap(float *xp, float *yp)
-//{
-//	float temp = *xp;
-//	*xp = *yp;
-//	*yp = temp;
-//}
-//
-//void SelectionSort(float* ds)
-//{
-//	int i, j, min_idx;
-//
-//	//One by one move boundary of unsorted subarray
-//	for (i = 0; i < DATA_SIZE - 1; i++)
-//	{
-//		//Find the minimum element in unsorted array
-//		min_idx = i;
-//		for (j = i + 1; j < DATA_SIZE; j++)
-//		{
-//			if (ds[j] < ds[min_idx])
-//				min_idx = j;
-//		}
-//
-//		//Swap the found minimum element with the first element
-//		Swap(&ds[min_idx], &ds[i]);
-//	}
-//}
-
 float Average(float* ds)
 {
 	float sum = 0.f;
@@ -135,30 +119,12 @@ float Average(float* ds)
 
 float Maximum(float* ds)
 {
-	float maxValue = 0.f;
-	
-	//Find maximum value in the dataset array
-	for (int i = 0; i < DATA_SIZE; i++)
-	{
-		if (ds[i] > maxValue)
-			maxValue = ds[i];
-	}
-	
-	return maxValue;
+	return ds[DATA_SIZE - 1];
 }
 
 float Minimum(float* ds)
 {
-	float minValue = 100.f;
-
-	//Find maximum value in the dataset array
-	for (int i = 0; i < DATA_SIZE; i++)
-	{
-		if (ds[i] < minValue)
-			minValue = ds[i];
-	}
-
-	return minValue;
+	return ds[0];
 }
 
 int main()
@@ -173,6 +139,9 @@ int main()
 	float* ds = malloc(sizeof(float) * DATA_SIZE);
 	LoadDataset("dataset.dat", ds);
 
+	//Sort the dataset and put the new data in ds
+	qsort(ds, DATA_SIZE, sizeof(float), Cmpfunc);
+
 	//Compute the average value of the dataset
 	float avg = Average(ds);
 
@@ -181,9 +150,6 @@ int main()
 
 	//Find the min value in the dataset
 	float min = Minimum(ds);
-
-	//Sort the dataset and put the new data in ds
-	InsertionSort(ds);
 
 	//Write sorted array to a new file
 	WriteDataset("sorted.dat", ds, avg, min, max);
